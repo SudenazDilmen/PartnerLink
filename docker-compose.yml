@@ -1,0 +1,34 @@
+# Run everything:   docker compose up --build   ->  http://localhost:8091
+# Only the database: docker compose up -d db      (then `dotnet run` the web project)
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-PartnerLink_Dev#2026}
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8091:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=PartnerLink;User Id=sa;Password=${MSSQL_SA_PASSWORD:-PartnerLink_Dev#2026};TrustServerCertificate=True"
+      UseHttpsRedirection: "false"
+      Seed__DemoData: "true"
+
+volumes:
+  sqldata:
