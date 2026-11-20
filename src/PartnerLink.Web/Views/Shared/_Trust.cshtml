@@ -1,0 +1,5 @@
+@model decimal
+@{
+    var css = Model >= 4.0m ? "text-success" : Model >= 2.5m ? "text-warning-emphasis" : "text-danger";
+}
+<span class="fw-semibold @css" title="TrustScore: reviews and responsiveness">&#9733; @Model.ToString("0.0")</span>

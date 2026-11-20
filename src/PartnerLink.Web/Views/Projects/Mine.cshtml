@@ -1,0 +1,64 @@
+@model IReadOnlyList<Project>
+@{
+    ViewData["Title"] = "My projects";
+    var today = DateTime.UtcNow.Date;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">My projects</h1>
+    <a class="btn btn-primary" asp-action="Create">Publish a partner search</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Partner search ends</th>
+                    <th class="text-end">Applications</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var project in Model)
+                {
+                    var open = project.Status == ProjectStatus.Open && project.PartnerSearchEnd.Date >= today;
+                    var pending = project.Applications.Count(a => a.Status == ApplicationStatus.Pending);
+                    <tr>
+                        <td>
+                            <a class="fw-medium text-decoration-none" asp-action="Details" asp-route-id="@project.Id">@project.Title</a>
+                            <div class="small text-secondary">@project.ActionType.Label() &middot; @project.Sector.Label()</div>
+                        </td>
+                        <td>
+                            @if (open)
+                            {
+                                <span class="badge text-bg-success">Open</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">Closed</span>
+                            }
+                        </td>
+                        <td>@project.PartnerSearchEnd.ToString("MMM d, yyyy")</td>
+                        <td class="text-end">
+                            @project.Applications.Count
+                            @if (pending > 0)
+                            {
+                                <span class="badge text-bg-warning ms-1">@pending new</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@project.Id">Edit</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-secondary py-4">You have not published a partner search yet.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

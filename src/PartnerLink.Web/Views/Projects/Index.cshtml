@@ -1,0 +1,99 @@
+@model ProjectIndexViewModel
+@{
+    ViewData["Title"] = "Find partners";
+    var filter = Model.Filter;
+    var result = Model.Result;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">Find partners</h1>
+    @if (User.IsInRole(Roles.Organization))
+    {
+        <a class="btn btn-primary" asp-action="Create">Publish a partner search</a>
+    }
+</div>
+
+<form method="get" class="card card-body mb-4">
+    <div class="row g-2">
+        <div class="col-lg-4">
+            <input type="search" name="Query" value="@filter.Query" class="form-control" placeholder="Search keywords, e.g. digital art" />
+        </div>
+        <div class="col-6 col-lg-2">
+            <select name="Country" class="form-select" aria-label="Partner country">
+                <option value="">Any partner country</option>
+                @foreach (var country in Countries.All)
+                {
+                    <option value="@country" selected="@(filter.Country == country)">@country</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-2">
+            <select name="ActionType" class="form-select" aria-label="Action type">
+                <option value="">Any action type</option>
+                @foreach (var action in Enum.GetValues<ActionType>())
+                {
+                    <option value="@action" selected="@(filter.ActionType == action)">@action.Label()</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-2">
+            <select name="Sector" class="form-select" aria-label="Sector">
+                <option value="">Any sector</option>
+                @foreach (var sector in EnumFlags.SingleValues<Sector>())
+                {
+                    <option value="@sector" selected="@(filter.Sector == sector)">@sector.Label()</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-2">
+            <select name="Priority" class="form-select" aria-label="Priority">
+                <option value="">Any priority</option>
+                @foreach (var priority in EnumFlags.SingleValues<Priority>())
+                {
+                    <option value="@priority" selected="@(filter.Priority == priority)">@priority.Label()</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Reset</a>
+        <span class="ms-auto text-secondary align-self-center small">@result.TotalCount open partner searches</span>
+    </div>
+</form>
+
+<div class="row g-3">
+    @foreach (var card in result.Items)
+    {
+        <div class="col-md-6">
+            <partial name="_ProjectCard" model="card" />
+        </div>
+    }
+    @if (result.Items.Count == 0)
+    {
+        <div class="col-12">
+            <div class="card card-body text-center text-secondary py-5">No partner searches match your filters.</div>
+        </div>
+    }
+</div>
+
+@if (result.TotalPages > 1)
+{
+    <nav class="mt-4" aria-label="Pages">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(result.HasPrevious ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-Page="@(result.Page - 1)"
+                   asp-route-Query="@filter.Query" asp-route-Country="@filter.Country"
+                   asp-route-ActionType="@filter.ActionType" asp-route-Sector="@filter.Sector"
+                   asp-route-Priority="@filter.Priority">Previous</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">Page @result.Page of @result.TotalPages</span></li>
+            <li class="page-item @(result.HasNext ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-Page="@(result.Page + 1)"
+                   asp-route-Query="@filter.Query" asp-route-Country="@filter.Country"
+                   asp-route-ActionType="@filter.ActionType" asp-route-Sector="@filter.Sector"
+                   asp-route-Priority="@filter.Priority">Next</a>
+            </li>
+        </ul>
+    </nav>
+}

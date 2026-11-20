@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Find your Erasmus+ partners";
+}
+
+<section class="hero p-5 mb-4 shadow-sm">
+    <h1 class="display-5 fw-bold">Find reliable Erasmus+ partners in minutes</h1>
+    <p class="lead mb-4">
+        Publish your partner search, filter hundreds of projects by sector, priority and country,
+        and talk to verified organizations in a private chat. No more endless e-mail chains.
+    </p>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-light btn-lg" asp-controller="Account" asp-action="Register">Register your organization</a>
+        <a class="btn btn-outline-light btn-lg" asp-controller="Account" asp-action="Login">Sign in</a>
+    </div>
+</section>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h5">Verified organizations</h2>
+            <p class="mb-0 text-secondary">Every organization registers with its Erasmus+ OID, which a platform admin checks. Verified partners get a badge.</p>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h5">Trust score</h2>
+            <p class="mb-0 text-secondary">Partners rate each other on communication, task management and reporting. Ghosting lowers the score automatically.</p>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h5">Smart suggestions &amp; live chat</h2>
+            <p class="mb-0 text-secondary">Get partner suggestions for your project, accept an application, and negotiate in a private real-time chat room.</p>
+        </div></div>
+    </div>
+</div>

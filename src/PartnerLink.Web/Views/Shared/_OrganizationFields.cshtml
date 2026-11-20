@@ -1,0 +1,77 @@
+@model OrganizationFormViewModel
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger small"></span>
+</div>
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label asp-for="OidCode" class="form-label"></label>
+        <input asp-for="OidCode" class="form-control" placeholder="E10123456" />
+        <div class="form-text">Your Erasmus+ Organisation ID. An admin checks it before you can publish or apply.</div>
+        <span asp-validation-for="OidCode" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Type" class="form-label"></label>
+        <select asp-for="Type" class="form-select">
+            @foreach (var type in Enum.GetValues<OrganizationType>())
+            {
+                <option value="@type">@type.Label()</option>
+            }
+        </select>
+    </div>
+</div>
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label asp-for="Country" class="form-label"></label>
+        <select asp-for="Country" class="form-select">
+            <option value="">Choose a country</option>
+            @foreach (var country in Countries.All)
+            {
+                <option value="@country">@country</option>
+            }
+        </select>
+        <span asp-validation-for="Country" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="City" class="form-label"></label>
+        <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger small"></span>
+    </div>
+</div>
+<div class="mb-3">
+    <label asp-for="Website" class="form-label"></label>
+    <input asp-for="Website" class="form-control" placeholder="https://" />
+    <span asp-validation-for="Website" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+    <span asp-validation-for="Description" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <div class="form-label">Areas of expertise (sectors)</div>
+    @foreach (var sector in EnumFlags.SingleValues<Sector>())
+    {
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="Sectors" id="sector-@sector" value="@sector" checked="@Model.Sectors.Contains(sector)" />
+            <label class="form-check-label" for="sector-@sector">@sector.Label()</label>
+        </div>
+    }
+</div>
+<div class="mb-3">
+    <div class="form-label">Priorities you work on</div>
+    @foreach (var priority in EnumFlags.SingleValues<Priority>())
+    {
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="Priorities" id="priority-@priority" value="@priority" checked="@Model.Priorities.Contains(priority)" />
+            <label class="form-check-label" for="priority-@priority">@priority.Label()</label>
+        </div>
+    }
+</div>
+<div class="form-check mb-3">
+    <input asp-for="OpenToNewProjects" class="form-check-input" />
+    <label asp-for="OpenToNewProjects" class="form-check-label"></label>
+</div>

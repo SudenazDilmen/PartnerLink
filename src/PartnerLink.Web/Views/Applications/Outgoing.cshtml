@@ -1,0 +1,46 @@
+@model IReadOnlyList<PartnerApplication>
+@{
+    ViewData["Title"] = "My applications";
+}
+
+<h1 class="h3 mb-3">My applications</h1>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Project</th>
+                    <th>Organizer</th>
+                    <th>Sent</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var application in Model)
+                {
+                    var project = application.Project!;
+                    <tr>
+                        <td><a class="fw-medium text-decoration-none" asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">@project.Title</a></td>
+                        <td>@project.Organization!.Name</td>
+                        <td>@application.CreatedAtUtc.ToString("MMM d, yyyy")</td>
+                        <td>
+                            <span class="badge @(application.Status == ApplicationStatus.Pending ? "text-bg-warning" : application.Status == ApplicationStatus.Rejected ? "text-bg-secondary" : "text-bg-success")">@application.Status</span>
+                        </td>
+                        <td class="text-end">
+                            @if (application.Status is ApplicationStatus.Accepted or ApplicationStatus.Completed)
+                            {
+                                <a class="btn btn-sm btn-outline-primary" asp-controller="Chat" asp-action="Room" asp-route-id="@application.Id">Open chat</a>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-secondary py-4">You have not applied to any project yet. <a asp-controller="Projects" asp-action="Index">Find partners</a>.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

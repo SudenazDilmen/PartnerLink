@@ -1,0 +1,100 @@
+@model OrganizationDetailsViewModel
+@{
+    var organization = Model.Organization;
+    ViewData["Title"] = organization.Name;
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+            <div>
+                <h1 class="h3 mb-1">@organization.Name</h1>
+                <partial name="_VerifiedBadge" model="@(organization.Verification == VerificationStatus.Verified)" />
+                @if (organization.Verification == VerificationStatus.Pending)
+                {
+                    <span class="badge text-bg-warning">Verification pending</span>
+                }
+                @if (organization.Verification == VerificationStatus.Rejected)
+                {
+                    <span class="badge text-bg-danger">Verification rejected</span>
+                }
+                <div class="text-secondary mt-1">@organization.City, @organization.Country &middot; @organization.Type.Label()</div>
+            </div>
+            @if (Model.IsMine)
+            {
+                <a class="btn btn-outline-primary" asp-action="Edit">Edit profile</a>
+            }
+        </div>
+
+        <div class="card mb-3"><div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(organization.Description))
+            {
+                <p style="white-space: pre-line">@organization.Description</p>
+            }
+            <dl class="row mb-0">
+                <dt class="col-sm-3">OID</dt>
+                <dd class="col-sm-9">@organization.OidCode</dd>
+                @if (!string.IsNullOrWhiteSpace(organization.Website))
+                {
+                    <dt class="col-sm-3">Website</dt>
+                    <dd class="col-sm-9"><a href="@organization.Website" rel="noopener nofollow" target="_blank">@organization.Website</a></dd>
+                }
+                <dt class="col-sm-3">Expertise</dt>
+                <dd class="col-sm-9">
+                    @foreach (var sector in EnumFlags.Split(organization.Sectors))
+                    {
+                        <span class="badge text-bg-primary me-1">@sector.Label()</span>
+                    }
+                    @foreach (var priority in EnumFlags.Split(organization.Priorities))
+                    {
+                        <span class="badge text-bg-success me-1">@priority.Label()</span>
+                    }
+                </dd>
+                <dt class="col-sm-3">New projects</dt>
+                <dd class="col-sm-9">@(organization.OpenToNewProjects ? "Open to new projects" : "Not looking for new projects right now")</dd>
+            </dl>
+        </div></div>
+
+        <div class="card">
+            <div class="card-header bg-body fw-semibold">Reviews</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var review in Model.Reviews)
+                {
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-medium">@review.Reviewer!.Name</span>
+                            <span class="small text-secondary">@review.CreatedAtUtc.ToString("MMM d, yyyy")</span>
+                        </div>
+                        <div class="small text-secondary mb-1">
+                            Communication @review.Communication/5 &middot; Tasks @review.TaskManagement/5 &middot; Reporting @review.Reporting/5
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(review.Comment))
+                        {
+                            <div>@review.Comment</div>
+                        }
+                    </li>
+                }
+                @if (Model.Reviews.Count == 0)
+                {
+                    <li class="list-group-item text-secondary">No reviews yet.</li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card"><div class="card-body">
+            <div class="text-secondary small">TrustScore</div>
+            <div class="display-6 mb-2"><partial name="_Trust" model="organization.TrustScore" /></div>
+            <ul class="list-unstyled small mb-0">
+                <li>@Model.Stats.ReviewCount reviews@(Model.Stats.ReviewCount > 0 ? " (average " + Model.Stats.AverageRating.ToString("0.0") + "/5)" : "")</li>
+                <li>@Model.Stats.CompletedPartnerships completed partnerships</li>
+                <li>@Model.Stats.GhostedConversations conversation(s) left unanswered</li>
+            </ul>
+            <hr />
+            <div class="small text-secondary">
+                The score is the average of all reviews (3.0 for new organizations) minus 0.5 for every chat that stayed unanswered for too long.
+            </div>
+        </div></div>
+    </div>
+</div>

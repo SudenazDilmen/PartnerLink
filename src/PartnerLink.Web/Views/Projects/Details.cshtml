@@ -1,0 +1,167 @@
+@model ProjectDetailsViewModel
+@{
+    var project = Model.Project;
+    var host = project.Organization!;
+    ViewData["Title"] = project.Title;
+    var today = DateTime.UtcNow.Date;
+    var searchOpen = project.Status == ProjectStatus.Open && project.PartnerSearchEnd.Date >= today;
+    var me = Model.CurrentOrganization;
+    var verified = me is not null && me.Verification == VerificationStatus.Verified;
+    var application = Model.ExistingApplication;
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+            <h1 class="h3 mb-0">@project.Title</h1>
+            @if (project.Status == ProjectStatus.Closed)
+            {
+                <span class="badge text-bg-secondary">Closed</span>
+            }
+            else if (!searchOpen)
+            {
+                <span class="badge text-bg-secondary">Partner search ended</span>
+            }
+        </div>
+
+        <div class="mb-3 d-flex flex-wrap gap-1">
+            <span class="badge text-bg-dark">@project.ActionType.Label()</span>
+            <span class="badge text-bg-primary">@project.Sector.Label()</span>
+            @foreach (var priority in EnumFlags.Split(project.Priorities))
+            {
+                <span class="badge text-bg-success">@priority.Label()</span>
+            }
+        </div>
+
+        <div class="card mb-3"><div class="card-body">
+            <p class="lead">@project.Summary</p>
+            @if (!string.IsNullOrWhiteSpace(project.Details))
+            {
+                <p style="white-space: pre-line">@project.Details</p>
+            }
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Looking for partners in</dt>
+                <dd class="col-sm-8">@CountryList.Describe(project.TargetCountries)</dd>
+
+                @if (!string.IsNullOrWhiteSpace(project.PartnerRole))
+                {
+                    <dt class="col-sm-4">Role of the partner</dt>
+                    <dd class="col-sm-8">@project.PartnerRole</dd>
+                }
+
+                <dt class="col-sm-4">Partner search ends</dt>
+                <dd class="col-sm-8">@project.PartnerSearchEnd.ToString("MMM d, yyyy")</dd>
+
+                @if (project.ProjectDeadline is { } deadline)
+                {
+                    <dt class="col-sm-4">Project application deadline</dt>
+                    <dd class="col-sm-8">@deadline.ToString("MMM d, yyyy")</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(project.BudgetNote))
+                {
+                    <dt class="col-sm-4">Budget</dt>
+                    <dd class="col-sm-8">@project.BudgetNote</dd>
+                }
+            </dl>
+        </div></div>
+
+        @if (Model.IsOwner)
+        {
+            <div class="card mb-3">
+                <div class="card-header bg-body d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Suggested partners</span>
+                    <span class="small text-secondary">Rule-based: sector, priorities, country and trust score</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var suggestion in Model.Suggestions)
+                    {
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div>
+                                    <a asp-controller="Organizations" asp-action="Details" asp-route-id="@suggestion.OrganizationId" class="fw-semibold text-decoration-none">@suggestion.Name</a>
+                                    <span class="text-secondary small">@suggestion.Country</span>
+                                    <partial name="_Trust" model="suggestion.TrustScore" />
+                                    <ul class="small text-secondary mb-0 ps-3">
+                                        @foreach (var reason in suggestion.Reasons)
+                                        {
+                                            <li>@reason</li>
+                                        }
+                                    </ul>
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge text-bg-info mb-2">Match @suggestion.Score%</div>
+                                    <form asp-action="Invite" asp-route-id="@project.Id" method="post">
+                                        <input type="hidden" name="organizationId" value="@suggestion.OrganizationId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Invite</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                    @if (Model.Suggestions.Count == 0)
+                    {
+                        <li class="list-group-item text-secondary">No matching organizations yet. Suggestions appear when verified organizations with similar sectors or priorities are open to new projects.</li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-3"><div class="card-body">
+            <div class="text-secondary small mb-1">Published by</div>
+            <a asp-controller="Organizations" asp-action="Details" asp-route-id="@host.Id" class="h5 text-decoration-none">@host.Name</a>
+            <div class="mb-2"><partial name="_VerifiedBadge" model="@(host.Verification == VerificationStatus.Verified)" /></div>
+            <div class="small text-secondary mb-2">@host.City, @host.Country</div>
+            <div>Trust score <partial name="_Trust" model="host.TrustScore" /></div>
+            <div class="small text-secondary">@Model.HostStats.ReviewCount reviews &middot; @Model.HostStats.CompletedPartnerships completed partnerships</div>
+        </div></div>
+
+        @if (Model.IsOwner)
+        {
+            <div class="card"><div class="card-body d-grid gap-2">
+                <a class="btn btn-outline-primary" asp-controller="Applications" asp-action="Incoming">View applications</a>
+                <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@project.Id">Edit project</a>
+                @if (project.Status == ProjectStatus.Open)
+                {
+                    <form asp-action="Close" asp-route-id="@project.Id" method="post" onsubmit="return confirm('Close this partner search?');">
+                        <button type="submit" class="btn btn-outline-danger w-100">Close partner search</button>
+                    </form>
+                }
+            </div></div>
+        }
+        else if (me is not null)
+        {
+            <div class="card"><div class="card-body">
+                @if (application is not null)
+                {
+                    <div class="fw-semibold mb-1">Your application</div>
+                    <p class="mb-2">Status: <span class="badge text-bg-secondary">@application.Status</span></p>
+                    @if (application.Status is ApplicationStatus.Accepted or ApplicationStatus.Completed)
+                    {
+                        <a class="btn btn-primary w-100" asp-controller="Chat" asp-action="Room" asp-route-id="@application.Id">Open chat</a>
+                    }
+                }
+                else if (!verified)
+                {
+                    <div class="alert alert-warning mb-0">Your organization must be verified before you can apply.</div>
+                }
+                else if (!searchOpen)
+                {
+                    <div class="text-secondary">This partner search is closed.</div>
+                }
+                else
+                {
+                    <form asp-controller="Applications" asp-action="Apply" method="post">
+                        <input type="hidden" name="ProjectId" value="@project.Id" />
+                        <label class="form-label fw-semibold" for="apply-message">Apply as partner</label>
+                        <textarea id="apply-message" name="Message" class="form-control mb-2" rows="5" maxlength="2000"
+                                  placeholder="Introduce your organization and explain why you fit this project." required></textarea>
+                        <button type="submit" class="btn btn-primary w-100">Send application</button>
+                    </form>
+                }
+            </div></div>
+        }
+    </div>
+</div>

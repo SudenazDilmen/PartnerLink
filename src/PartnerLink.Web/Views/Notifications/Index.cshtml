@@ -1,0 +1,22 @@
+@model IReadOnlyList<Notification>
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<h1 class="h3 mb-3">Notifications</h1>
+
+<div class="list-group">
+    @foreach (var notification in Model)
+    {
+        <a class="list-group-item list-group-item-action @(notification.IsRead ? "" : "list-group-item-warning")" href="@notification.Url">
+            <div class="d-flex justify-content-between">
+                <span>@notification.Text</span>
+                <span class="small text-secondary ms-3 flex-shrink-0">@notification.CreatedAtUtc.ToString("MMM d, HH:mm") UTC</span>
+            </div>
+        </a>
+    }
+    @if (Model.Count == 0)
+    {
+        <div class="list-group-item text-secondary">Nothing here yet.</div>
+    }
+</div>

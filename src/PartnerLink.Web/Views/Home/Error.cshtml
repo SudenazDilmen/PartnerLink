@@ -1,0 +1,8 @@
+@model string
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="h3 text-danger">Something went wrong</h1>
+<p>The request could not be completed. If the problem continues, quote this id: <code>@Model</code></p>
+<a class="btn btn-primary" asp-controller="Home" asp-action="Index">Back to start</a>

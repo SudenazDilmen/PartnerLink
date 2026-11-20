@@ -1,0 +1,78 @@
+@model AdminViewModel
+@{
+    ViewData["Title"] = "Verification";
+}
+
+<h1 class="h3 mb-3">Organization verification</h1>
+<p class="text-secondary">Check the OID in the Erasmus+ Organisation Registration System, then approve or reject the organization.</p>
+
+<div class="card mb-4">
+    <div class="card-header bg-body fw-semibold">Pending (@Model.Pending.Count)</div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead class="table-light"><tr><th>Organization</th><th>OID</th><th>Country</th><th>Contact</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var organization in Model.Pending)
+                {
+                    <tr>
+                        <td><a asp-controller="Organizations" asp-action="Details" asp-route-id="@organization.Id" class="text-decoration-none fw-medium">@organization.Name</a></td>
+                        <td>@organization.OidCode</td>
+                        <td>@organization.Country</td>
+                        <td>@organization.Owner?.Email</td>
+                        <td class="text-end">
+                            <form asp-action="Verify" asp-route-id="@organization.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-primary">Verify</button>
+                            </form>
+                            <form asp-action="Reject" asp-route-id="@organization.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Pending.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-secondary py-3">No organizations are waiting for verification.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-body fw-semibold">Verified (@Model.Verified.Count)</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var organization in Model.Verified)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@organization.Name <span class="small text-secondary">@organization.Country</span></span>
+                        <form asp-action="Reject" asp-route-id="@organization.Id" method="post">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Revoke</button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-body fw-semibold">Rejected (@Model.Rejected.Count)</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var organization in Model.Rejected)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@organization.Name <span class="small text-secondary">@organization.Country</span></span>
+                        <form asp-action="Verify" asp-route-id="@organization.Id" method="post">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Verify</button>
+                        </form>
+                    </li>
+                }
+                @if (Model.Rejected.Count == 0)
+                {
+                    <li class="list-group-item text-secondary">None.</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

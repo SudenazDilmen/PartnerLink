@@ -1,0 +1,66 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Welcome, @Model.Organization.Name</h1>
+        <div class="text-secondary">
+            <partial name="_VerifiedBadge" model="@(Model.Organization.Verification == VerificationStatus.Verified)" />
+            <span class="ms-2">Trust score <partial name="_Trust" model="Model.Organization.TrustScore" /></span>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-controller="Projects" asp-action="Index">Find partners</a>
+        <a class="btn btn-outline-primary" asp-controller="Projects" asp-action="Create">Publish a partner search</a>
+    </div>
+</div>
+
+@if (Model.Organization.Verification == VerificationStatus.Pending)
+{
+    <div class="alert alert-warning">
+        Your organization is <strong>pending verification</strong>. You can browse projects now. Publishing a partner search and applying unlock once an admin has checked your OID.
+    </div>
+}
+else if (Model.Organization.Verification == VerificationStatus.Rejected)
+{
+    <div class="alert alert-danger">
+        Your organization could not be verified. Please check your OID and details in <a asp-controller="Organizations" asp-action="Edit">your profile</a>.
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" asp-controller="Projects" asp-action="Mine">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="text-secondary small">Open partner searches</div>
+                <div class="stat-value">@Model.Summary.OpenProjects</div>
+            </div></div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" asp-controller="Applications" asp-action="Incoming">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="text-secondary small">Applications to answer</div>
+                <div class="stat-value @(Model.Summary.PendingIncomingApplications > 0 ? "text-warning-emphasis" : "")">@Model.Summary.PendingIncomingApplications</div>
+            </div></div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" asp-controller="Applications" asp-action="Outgoing">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="text-secondary small">Active partnerships</div>
+                <div class="stat-value text-success">@Model.Summary.ActivePartnerships</div>
+            </div></div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" asp-controller="Notifications" asp-action="Index">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="text-secondary small">Unread notifications</div>
+                <div class="stat-value">@Model.Summary.UnreadNotifications</div>
+            </div></div>
+        </a>
+    </div>
+</div>
