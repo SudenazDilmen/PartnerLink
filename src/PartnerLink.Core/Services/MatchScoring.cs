@@ -44,6 +44,6 @@ public static class MatchScoring
         if (candidate.TrustScore >= 4.0m)
             reasons.Add($"Trust score {candidate.TrustScore:0.0}/5");
 
-        return ((int)Math.Round(score), reasons, topicMatch);
+        return ((int)Math.Round(score, MidpointRounding.AwayFromZero), reasons, topicMatch);
     }
 }

@@ -19,7 +19,7 @@ public sealed class TrustService(AppDbContext db, TimeProvider clock, INotificat
     {
         var baseScore = averageReview.HasValue ? (decimal)averageReview.Value : DefaultScore;
         var score = baseScore - GhostingPenalty * ghostedConversations;
-        return Math.Round(Math.Clamp(score, 0m, 5m), 2);
+        return Math.Round(Math.Clamp(score, 0m, 5m), 2, MidpointRounding.AwayFromZero);
     }
 
     public async Task<decimal> CalculateAsync(int organizationId, CancellationToken ct = default)
