@@ -1,5 +1,7 @@
 # PartnerLink
 
+[![CI](https://github.com/SudenazDilmen/PartnerLink/actions/workflows/ci.yml/badge.svg)](https://github.com/SudenazDilmen/PartnerLink/actions/workflows/ci.yml)
+
 A partner-finding platform for Erasmus+ organizations, built with **.NET 10**, **ASP.NET Core MVC**, **SignalR**, **EF Core** and **SQL Server 2022**.
 
 Organizations register with their OID code, get verified by an admin, publish project ideas, find partners through a filtered feed, apply, chat in real time, and build a trust score through reviews.
